@@ -4,13 +4,7 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="be025498-9dd4-47fa-9e32-ac2e4e208a37" name="Changes" comment="Frameworks setted">
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/README.md" beforeDir="false" afterPath="$PROJECT_DIR$/README.md" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/final project.pdf" beforeDir="false" afterPath="$PROJECT_DIR$/resources/final project.pdf" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/people.txt" beforeDir="false" afterPath="$PROJECT_DIR$/resources/people.txt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/DatabaseProcessing.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/DatabaseProcessing.java" afterDir="false" />
-    </list>
+    <list default="true" id="be025498-9dd4-47fa-9e32-ac2e4e208a37" name="Changes" comment="v0.9.1 workable-not tested" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -75,7 +69,7 @@
       <option name="presentableId" value="Default" />
       <updated>1701933783896</updated>
       <workItem from="1701933784908" duration="1233000" />
-      <workItem from="1701935157935" duration="5101000" />
+      <workItem from="1701935157935" duration="5444000" />
     </task>
     <task id="LOCAL-00001" summary="Created roots files">
       <option name="closed" value="true" />
@@ -101,7 +95,15 @@
       <option name="project" value="LOCAL" />
       <updated>1701936611398</updated>
     </task>
-    <option name="localTasksCounter" value="4" />
+    <task id="LOCAL-00004" summary="v0.9.1 workable-not tested">
+      <option name="closed" value="true" />
+      <created>1701940431694</created>
+      <option name="number" value="00004" />
+      <option name="presentableId" value="LOCAL-00004" />
+      <option name="project" value="LOCAL" />
+      <updated>1701940431694</updated>
+    </task>
+    <option name="localTasksCounter" value="5" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -133,7 +135,8 @@
   <component name="VcsManagerConfiguration">
     <MESSAGE value="Created roots files" />
     <MESSAGE value="Frameworks setted" />
-    <option name="LAST_COMMIT_MESSAGE" value="Frameworks setted" />
+    <MESSAGE value="v0.9.1 workable-not tested" />
+    <option name="LAST_COMMIT_MESSAGE" value="v0.9.1 workable-not tested" />
   </component>
   <component name="XSLT-Support.FileAssociations.UIState">
     <expand />
