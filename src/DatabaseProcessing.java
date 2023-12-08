@@ -3,14 +3,15 @@ PeopleRecord Class: Comparable Interface
 Your PeopleRecord class has a compareTo method, but it does not implement the Comparable interface. To adhere to Java's conventions and ensure compatibility with collections that rely on comparison (like a sorted tree or heap), it's recommended to explicitly implement Comparable<PeopleRecord>.
 
 MyBST Class: Handling Duplicates
-TODO:Your current MyBST implementation does not account for the possibility of duplicate entries. Since you're comparing records by family name, consider what should happen if two records have the same family name. You might need to define a secondary comparison criterion or handle duplicates in some other manner.
+Your current MyBST implementation does not account for the possibility of duplicate entries. Since you're comparing records by family name, consider what should happen if two records have the same family name. You might need to define a secondary comparison criterion or handle duplicates in some other manner.
 
 MyHeap Class: Comparison Logic
-TODO:Ensure that the comparison logic in your MyHeap class aligns with how you want to structure the heap (min-heap or max-heap). The current implementation seems to be for a min-heap. If a max-heap is desired, you'll need to adjust the comparison logic in heapifyUp and heapifyDown.
+Ensure that the comparison logic in your MyHeap class aligns with how you want to structure the heap (min-heap or max-heap). The current implementation seems to be for a min-heap. If a max-heap is desired, you'll need to adjust the comparison logic in heapifyUp and heapifyDown.
+Under the codes have already realized the function of smallest heap. If the larget heap is needed, you can change the "smallest" in line 289 into "largest".
 
 MyHashmap Class: Resize Logic and Deleted Entries
 Your MyHashmap does not currently handle resizing when it becomes full, nor does it have a mechanism to handle deleted entries (like using a special object to mark deleted slots). Depending on the expected use case and data size, you might want to implement these features.
-TODO:Additionally, ensure that the hash function (getHashIndex) evenly distributes entries to minimize collisions.
+Additionally, ensure that the hash function (getHashIndex) evenly distributes entries to minimize collisions.
 
 General:
 Error Handling
@@ -153,7 +154,7 @@ public class DatabaseProcessing {
 }
 
 
-class MyBST {
+class   MyBST {
     PeopleRecord root; // Root node of the BST
 
     // Constructor
@@ -186,6 +187,9 @@ class MyBST {
 
     // Method to insert a new PeopleRecord into the tree
     public void insert(PeopleRecord newRecord) {
+        if (newRecord == null) {
+            throw new NullPointerException("Cannot insert null PeopleRecord.");
+        }
         root = insertRecord(root, newRecord);
     }
 
@@ -194,6 +198,12 @@ class MyBST {
         if (current == null) {
             return newRecord;
         }
+
+        if (newRecord.compareTo(current) == 0) {
+            System.out.println("Duplicate record found. Ignoring the new record.");
+            return current;
+        }
+
         if (newRecord.compareTo(current) < 0) {
             current.left = insertRecord(current.left, newRecord);
         } else if (newRecord.compareTo(current) > 0) {
@@ -292,8 +302,8 @@ class MyHeap {
 }
 
 class MyHashmap {
-    private PeopleRecord[] table;
-    private int capacity;
+    private final PeopleRecord[] table;
+    private final int capacity;
     private int size;
 
     // Constructor
@@ -372,10 +382,17 @@ class MyHashmap {
     }
 
     // Additional methods as required...
+    static class Deleted extends PeopleRecord {
+        static final Deleted INSTANCE = new Deleted();
+
+        private Deleted() {
+            super(null, null, null, null, null, null, null, null, null, null, null, null, null);
+        }
+    }
 }
 
 
-class PeopleRecord implements Comparable<PeopleRecord>{
+class PeopleRecord implements Comparable<PeopleRecord> {
     // Attributes
     private String givenName;
     private String familyName;
@@ -479,7 +496,11 @@ class PeopleRecord implements Comparable<PeopleRecord>{
 
     // compareTo Method
     public int compareTo(PeopleRecord other) {
-        return this.familyName.compareTo(other.familyName);
+        int lastNameComparison = this.familyName.compareTo(other.familyName);
+        if (lastNameComparison == 0) {
+            return this.givenName.compareTo(other.givenName);
+        }
+        return lastNameComparison;
     }
 }
 
