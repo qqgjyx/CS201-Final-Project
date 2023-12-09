@@ -24,18 +24,23 @@ DatabaseProcessing Class
 The DatabaseProcessing class is currently empty. This class should eventually include the logic for interacting with these data structures and implementing the required functionalities like loading data, searching, sorting, etc.
  */
 
-import java.util.*;
+
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
+import java.util.Scanner;
 
 public class DatabaseProcessing {
-    private MyBST bst;
-    private MyHeap heap;
-    private MyHashmap hashmap;
+    private MyBST<PeopleRecord> bst;
+    private MyHeap<PeopleRecord> heap;
+    private MyHashmap<String, PeopleRecord> hashmap;
 
     public DatabaseProcessing() {
-        bst = new MyBST();
+        bst = new MyBST<PeopleRecord>();
         heap = new MyHeap();
         hashmap = new MyHashmap(100); // Assuming an initial capacity of 100
     }
@@ -52,14 +57,19 @@ public class DatabaseProcessing {
                     data[0], data[1], data[2], data[3], data[4], data[5],
                     data[6], data[7], data[8], data[9], data[10], data[11], data[12]
             );
-            bst.insert(record);
+            try {
+                bst.insert(record);
+            } catch (NullPointerException e) {
+                System.out.println("Null nodes cannot be loaded" + e);
+            }
         }
         scanner.close();
     }
 
-    // Method b: search
+    //TODO Method b: search
     public List<PeopleRecord> search(String givenName, String familyName) {
-        return bst.search(givenName, familyName);
+        Predicate<PeopleRecord> isSmith = record -> "France".equals(record.getFamilyName());
+        return  bst.search(isSmith);
     }
 
     // Method c: sort
@@ -72,52 +82,49 @@ public class DatabaseProcessing {
         return sortedList;
     }
 
-    private void transferBSTtoHeap(PeopleRecord node) {
+    private void transferBSTtoHeap(MyBST.Node<PeopleRecord> node) {
         if (node != null) {
-            heap.insert(node);
+            heap.insert(node.data);
             transferBSTtoHeap(node.left);
             transferBSTtoHeap(node.right);
         }
     }
 
     // Method d: getMostFrequentWords
-    public Map<String, Integer> getMostFrequentWords(String fileName, int count, int len) throws FileNotFoundException, ShortLengthException {
+    public List<MyHashmap.MapEntry<String, Integer>> getMostFrequentWords(String fileName, int count, int len)
+            throws FileNotFoundException, ShortLengthException {
         if (len < 3) {
             throw new ShortLengthException("Length is less than 3");
         }
 
         Scanner scanner = new Scanner(new File(fileName));
-        Map<String, Integer> wordFrequencyMap = new HashMap<>();
+        MyHashmap<String, Integer> wordFrequencyMap = new MyHashmap<>(100);
 
         while (scanner.hasNext()) {
             String line = scanner.nextLine();
-            String[] words = line.split(";");
+            String[] fields = line.split(";");
 
-            for (String word : words) {
-                word = word.replaceAll("[^a-zA-Z]", "");
-                if (word.length() >= len) {
-                    wordFrequencyMap.put(word, wordFrequencyMap.getOrDefault(word, 0) + 1);
+            for (int i = 0; i < 7; i++) { // Assuming the first 7 fields are the ones of interest
+                String[] words = fields[i].replaceAll("[^a-zA-Z]", " ").split("\\W+");
+
+                for (String word : words) {
+                    word = word.toLowerCase(); // Consider converting to lower case to avoid case-sensitive duplicates
+                    if (word.length() >= len) {
+                        wordFrequencyMap.put(word, wordFrequencyMap.getOrDefault(word, 0) + 1);
+                    }
                 }
             }
         }
         scanner.close();
 
         // Create a list from elements of the hashmap
-        List<Map.Entry<String, Integer>> list = new ArrayList<>(wordFrequencyMap.entrySet());
+        List<MyHashmap.MapEntry<String, Integer>> list = new ArrayList<>(wordFrequencyMap.entrySet());
 
         // Sort the list using lambda expression
         list.sort((o1, o2) -> o2.getValue().compareTo(o1.getValue()));
 
-        // Put the sorted data back into the hashmap
-        LinkedHashMap<String, Integer> sortedMap = new LinkedHashMap<>();
-        for (Map.Entry<String, Integer> entry : list) {
-            sortedMap.put(entry.getKey(), entry.getValue());
-        }
-
         // Return only the top 'count' elements
-        return sortedMap.entrySet().stream()
-                .limit(count)
-                .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue, (e1, e2) -> e1, LinkedHashMap::new));
+        return list.subList(0, Math.min(count, list.size()));
     }
 
     // Custom exception class
@@ -145,7 +152,7 @@ public class DatabaseProcessing {
 //            System.out.println("Sorted Records: " + sortedRecords);
 
             // Test getMostFrequentWords
-            Map<String, Integer> frequentWords = dbProcessing.getMostFrequentWords("resources/people.txt", 5, 3);
+            List<MyHashmap.MapEntry<String, Integer>> frequentWords = dbProcessing.getMostFrequentWords("resources/people.txt", 5, 3);
             System.out.println("Frequent Words: " + frequentWords);
 
         } catch (FileNotFoundException e) {
@@ -157,8 +164,21 @@ public class DatabaseProcessing {
 }
 
 
-class MyBST {
-    PeopleRecord root; // Root node of the BST
+class MyBST<T extends Comparable<T>> {
+    Node<T> root; // Root node of the BST
+
+    // Node class
+    static class Node<T> {
+        T data;
+        Node<T> left;
+        Node<T> right;
+
+        Node(T data) {
+            this.data = data;
+            this.left = null;
+            this.right = null;
+        }
+    }
 
     // Constructor
     public MyBST() {
@@ -173,7 +193,7 @@ class MyBST {
     }
 
     // Helper method to count nodes
-    private int countNodes(PeopleRecord node) {
+    private int countNodes(Node<T> node) {
         if (node == null) {
             return 0;
         }
@@ -181,7 +201,7 @@ class MyBST {
     }
 
     // Helper method to determine the height of the tree
-    private int treeHeight(PeopleRecord node) {
+    private int treeHeight(Node<T> node) {
         if (node == null) {
             return 0;
         }
@@ -189,53 +209,48 @@ class MyBST {
     }
 
     // Method to insert a new PeopleRecord into the tree
-    public void insert(PeopleRecord newRecord) throws NullPointerException{
-        if (newRecord == null) {
-            throw new NullPointerException("Cannot insert null PeopleRecord.");
+    public void insert(T newData) throws NullPointerException {
+        if (newData == null) {
+            throw new NullPointerException("Cannot insert null data.");
         }
-        root = insertRecord(root, newRecord);
+        root = insertRecord(root, newData);
     }
 
     // Recursive helper method for insertion
-    private PeopleRecord insertRecord(PeopleRecord current, PeopleRecord newRecord) {
+    private Node<T> insertRecord(Node<T> current, T newData) {
         if (current == null) {
-            return newRecord;
+            return new Node<>(newData);
         }
 
-        if (newRecord.compareTo(current) <= 0) {
-            current.left = insertRecord(current.left, newRecord);
-        } else if (newRecord.compareTo(current) > 0) {
-            current.right = insertRecord(current.right, newRecord);
+        if (newData.compareTo(current.data) <= 0) {
+            current.left = insertRecord(current.left, newData);
+        } else if (newData.compareTo(current.data) > 0) {
+            current.right = insertRecord(current.right, newData);
         }
         return current; // Return the (unchanged) node pointer
     }
 
-    // Method to search for records by first/given name and family name
-    public List<PeopleRecord> search(String givenName, String familyName) {
-        List<PeopleRecord> matchingRecords = new ArrayList<>();
-        searchRecords(root, givenName, familyName, matchingRecords);
+    // Generic method to search for records based on a given predicate
+    public List<T> search(Predicate<T> condition) {
+        List<T> matchingRecords = new ArrayList<>();
+        searchRecords(root, condition, matchingRecords);
         return matchingRecords;
     }
 
     // Recursive helper method for search
-    private void searchRecords(PeopleRecord node, String givenName,
-                               String familyName, List<PeopleRecord> matchingRecords) {
+    private void searchRecords(Node<T> node, Predicate<T> condition, List<T> matchingRecords) {
         if (node != null) {
-            if (node.getGivenName().equals(givenName) && node.getFamilyName().equals(familyName)) {
-                matchingRecords.add(node);
+            if (condition.test(node.data)) {
+                matchingRecords.add(node.data);
             }
-            // Assuming the tree is ordered by family name, we can decide which subtree to search
-            if (familyName.compareTo(node.getFamilyName()) <= 0) {
-                searchRecords(node.left, givenName, familyName, matchingRecords);
-            } else {
-                searchRecords(node.right, givenName, familyName, matchingRecords);
-            }
+            searchRecords(node.left, condition, matchingRecords);
+            searchRecords(node.right, condition, matchingRecords);
         }
     }
 }
 
-class MyHeap {
-    private List<PeopleRecord> heap;
+class MyHeap<T extends Comparable<T>> {
+    private List<T> heap;
 
     // Constructor
     public MyHeap() {
@@ -243,8 +258,8 @@ class MyHeap {
     }
 
     // Method to add a new PeopleRecord into the heap
-    public void insert(PeopleRecord newRecord) {
-        heap.add(newRecord); // Add at the end of the list
+    public void insert(T newElement) {
+        heap.add(newElement); // Add at the end of the list
         heapifyUp(heap.size() - 1); // Adjust the heap from the last element upwards
     }
 
@@ -260,15 +275,15 @@ class MyHeap {
     }
 
     // Method to remove the root element (minimum element) from the heap
-    public PeopleRecord remove() {
+    public T remove() {
         if (heap.isEmpty()) {
             return null; // Or throw an exception
         }
-        PeopleRecord removedRecord = heap.get(0); // The root element
+        T removedElement = heap.get(0); // The root element
         heap.set(0, heap.get(heap.size() - 1)); // Move the last element to the root
         heap.remove(heap.size() - 1); // Remove the last element
         heapifyDown(0); // Adjust the heap from the root downwards
-        return removedRecord;
+        return removedElement;
     }
 
     // Method to get the size of the heap
@@ -299,45 +314,69 @@ class MyHeap {
     }
 }
 
-class MyHashmap {
-    private PeopleRecord[] table;
+class MyHashmap<K, V> {
+    private static final int DEFAULT_CAPACITY = 16; // Default initial capacity
+    private static final double LOAD_FACTOR_THRESHOLD = 0.75;
+    private MapEntry<K, V>[] entries;
     private int capacity;
     private int size;
 
-    // Constructor
+    // Default constructor
+    @SuppressWarnings("unchecked")
+    public MyHashmap() {
+        this.capacity = DEFAULT_CAPACITY;
+        this.entries = new MapEntry[DEFAULT_CAPACITY];
+        this.size = 0;
+    }
+
+    // Constructor with specified initial capacity
+    @SuppressWarnings("unchecked")
     public MyHashmap(int capacity) {
         this.capacity = capacity;
-        this.table = new PeopleRecord[capacity];
+        this.entries = new MapEntry[capacity];
         this.size = 0;
     }
 
     // Method to add a PeopleRecord to the hashmap
-    public void put(PeopleRecord record) {
-        int index = getHashIndex(record.getFamilyName());
-        int originalIndex = index;
-        int i = 1;
-
-        while (table[index] != null) {
-            index = (originalIndex + i * i) % capacity; // Quadratic probing
-            if (index == originalIndex) { // Table is full
-                return; // Or resize the table
-            }
-            i++;
+    public void put(K key, V value) {
+        if ((double) size / capacity >= LOAD_FACTOR_THRESHOLD) {
+            resize();
         }
 
-        table[index] = record;
-        size++;
-    }
-
-    // Method to get a PeopleRecord by key (e.g., family name)
-    public PeopleRecord get(String key) {
         int index = getHashIndex(key);
         int originalIndex = index;
         int i = 1;
 
-        while (table[index] != null) {
-            if (table[index].getFamilyName().equals(key)) {
-                return table[index];
+        while (true) {
+            if (entries[index] == null || entries[index].key == null) {
+                entries[index] = new MapEntry<>(key, value);
+                size++;
+                return;
+            } else if (entries[index].key.equals(key)) {
+                // Replace existing value
+                entries[index].value = value;
+                return;
+            }
+
+            index = (originalIndex + i * i) % capacity; // Quadratic probing
+            i++;
+
+            if (i == capacity) {
+                // This should not happen if resizing works correctly
+                throw new RuntimeException("Hashmap full, cannot insert new key: " + key);
+            }
+        }
+    }
+
+    // Method to get a PeopleRecord by key (e.g., family name)
+    public V get(K key) {
+        int index = getHashIndex(key);
+        int originalIndex = index;
+        int i = 1;
+
+        while (entries[index] != null) {
+            if (entries[index].key != null && entries[index].key.equals(key)) {
+                return entries[index].value;
             }
             index = (originalIndex + i * i) % capacity; // Quadratic probing
             if (index == originalIndex) {
@@ -350,14 +389,14 @@ class MyHashmap {
     }
 
     // Method to delete a PeopleRecord by key
-    public void delete(String key) {
+    public void delete(K key) {
         int index = getHashIndex(key);
         int originalIndex = index;
         int i = 1;
 
-        while (table[index] != null) {
-            if (table[index].getFamilyName().equals(key)) {
-                table[index] = null; // Mark as deleted
+        while (entries[index] != null) {
+            if (entries[index].key != null && entries[index].key.equals(key)) {
+                entries[index] = new MapEntry<>(null, null); // Mark as deleted
                 size--;
                 return;
             }
@@ -369,9 +408,29 @@ class MyHashmap {
         }
     }
 
+    // Method to resize
+    @SuppressWarnings("unchecked")
+    private void resize() {
+        int newCapacity = capacity * 2;
+        MapEntry<K, V>[] newEntries = (MapEntry<K, V>[]) new MapEntry[newCapacity];
+
+        for (MapEntry<K, V> entry : entries) {
+            if (entry != null && entry.key != null) {
+                int index = (entry.key.hashCode() & 0x7fffffff) % newCapacity;
+                while (newEntries[index] != null) {
+                    index = (index + 1) % newCapacity; // Simple linear probing for rehashing
+                }
+                newEntries[index] = entry;
+            }
+        }
+
+        entries = newEntries;
+        capacity = newCapacity;
+    }
+
     // Method to compute the hash index
-    private int getHashIndex(String key) {
-        return key.hashCode() % capacity;
+    private int getHashIndex(K key) {
+        return (key.hashCode() & 0x7fffffff) % capacity;
     }
 
     // Method to check the number of records in the hashmap
@@ -379,12 +438,45 @@ class MyHashmap {
         return size;
     }
 
-    // Additional methods as required...
-    static class Deleted extends PeopleRecord {
-        static final Deleted INSTANCE = new Deleted();
+    //TODO Additional methods as required...
 
-        private Deleted() {
-            super(null, null, null, null, null, null, null, null, null, null, null, null, null);
+    // Method to get entry set
+    public List<MapEntry<K, V>> entrySet() {
+        List<MapEntry<K, V>> entryList = new ArrayList<>();
+        for (MapEntry<K, V> entry : entries) {
+            if (entry != null && entry.getKey() != null) {
+                entryList.add(entry);
+            }
+        }
+        return entryList;
+    }
+
+    // Method to get value with default
+    public V getOrDefault(K key, V defaultValue) {
+        V value = get(key);
+        return (value != null) ? value : defaultValue;
+    }
+
+    static class MapEntry<K, V> {
+        K key;
+        V value;
+
+        MapEntry(K key, V value) {
+            this.key = key;
+            this.value = value;
+        }
+
+        public K getKey() {
+            return key;
+        }
+
+        public V getValue() {
+            return value;
+        }
+
+        @Override
+        public String toString() {
+            return key + "=" + value;
         }
     }
 }
