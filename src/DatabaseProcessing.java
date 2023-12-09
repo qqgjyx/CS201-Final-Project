@@ -21,7 +21,7 @@ Testing and Validation
 TODO:Thoroughly test each class to ensure they behave as expected, particularly under edge cases (like inserting duplicate values into the BST or handling collisions in the Hashmap).
 
 DatabaseProcessing Class
-TODO:The DatabaseProcessing class is currently empty. This class should eventually include the logic for interacting with these data structures and implementing the required functionalities like loading data, searching, sorting, etc.
+The DatabaseProcessing class is currently empty. This class should eventually include the logic for interacting with these data structures and implementing the required functionalities like loading data, searching, sorting, etc.
  */
 
 import java.util.*;
@@ -121,7 +121,7 @@ public class DatabaseProcessing {
     }
 
     // Custom exception class
-    class ShortLengthException extends Exception {
+    static class ShortLengthException extends Exception {
         public ShortLengthException(String message) {
             super(message);
         }
@@ -134,8 +134,11 @@ public class DatabaseProcessing {
             dbProcessing.loadData("resources/people.txt");
 
             // Test search
-            List<PeopleRecord> searchResults = dbProcessing.search("Johnetta", "Abdallah");
-            System.out.println("Search Results: " + searchResults);
+            List<PeopleRecord> searchResults = dbProcessing.search("Marcia", "France");
+            System.out.println("Search Results: " );
+            for (PeopleRecord pr : searchResults) {
+                System.out.println(pr);
+            }
 
             // Test sort
             List<PeopleRecord> sortedRecords = dbProcessing.sort();
@@ -154,7 +157,7 @@ public class DatabaseProcessing {
 }
 
 
-class   MyBST {
+class MyBST {
     PeopleRecord root; // Root node of the BST
 
     // Constructor
@@ -186,7 +189,7 @@ class   MyBST {
     }
 
     // Method to insert a new PeopleRecord into the tree
-    public void insert(PeopleRecord newRecord) {
+    public void insert(PeopleRecord newRecord) throws NullPointerException{
         if (newRecord == null) {
             throw new NullPointerException("Cannot insert null PeopleRecord.");
         }
@@ -199,12 +202,7 @@ class   MyBST {
             return newRecord;
         }
 
-        if (newRecord.compareTo(current) == 0) {
-            System.out.println("Duplicate record found. Ignoring the new record.");
-            return current;
-        }
-
-        if (newRecord.compareTo(current) < 0) {
+        if (newRecord.compareTo(current) <= 0) {
             current.left = insertRecord(current.left, newRecord);
         } else if (newRecord.compareTo(current) > 0) {
             current.right = insertRecord(current.right, newRecord);
@@ -227,7 +225,7 @@ class   MyBST {
                 matchingRecords.add(node);
             }
             // Assuming the tree is ordered by family name, we can decide which subtree to search
-            if (familyName.compareTo(node.getFamilyName()) < 0) {
+            if (familyName.compareTo(node.getFamilyName()) <= 0) {
                 searchRecords(node.left, givenName, familyName, matchingRecords);
             } else {
                 searchRecords(node.right, givenName, familyName, matchingRecords);
@@ -302,8 +300,8 @@ class MyHeap {
 }
 
 class MyHashmap {
-    private final PeopleRecord[] table;
-    private final int capacity;
+    private PeopleRecord[] table;
+    private int capacity;
     private int size;
 
     // Constructor
