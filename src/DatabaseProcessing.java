@@ -7,7 +7,7 @@ Your current MyBST implementation does not account for the possibility of duplic
 
 MyHeap Class: Comparison Logic
 Ensure that the comparison logic in your MyHeap class aligns with how you want to structure the heap (min-heap or max-heap). The current implementation seems to be for a min-heap. If a max-heap is desired, you'll need to adjust the comparison logic in heapifyUp and heapifyDown.
-Under the codes have already realized the function of smallest heap. If the larget heap is needed, you can change the "smallest" in line 289 into "largest".
+Under the codes have already realized the function of smallest heap. If the largest heap is needed, you can change the "smallest" in line 289 into "largest".
 
 MyHashmap Class: Resize Logic and Deleted Entries
 Your MyHashmap does not currently handle resizing when it becomes full, nor does it have a mechanism to handle deleted entries (like using a special object to mark deleted slots). Depending on the expected use case and data size, you might want to implement these features.
@@ -24,25 +24,23 @@ DatabaseProcessing Class
 The DatabaseProcessing class is currently empty. This class should eventually include the logic for interacting with these data structures and implementing the required functionalities like loading data, searching, sorting, etc.
  */
 
-
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.function.Predicate;
-import java.util.stream.Collectors;
 import java.util.Scanner;
 
+@SuppressWarnings("ALL")
 public class DatabaseProcessing {
-    private MyBST<PeopleRecord> bst;
-    private MyHeap<PeopleRecord> heap;
-    private MyHashmap<String, PeopleRecord> hashmap;
+    private final MyBST<PeopleRecord> bst;
+    private final MyHeap<PeopleRecord> heap;
 
     public DatabaseProcessing() {
         bst = new MyBST<PeopleRecord>();
-        heap = new MyHeap();
-        hashmap = new MyHashmap(100); // Assuming an initial capacity of 100
+        heap = new MyHeap<PeopleRecord>();
+        MyHashmap<String, PeopleRecord> hashmap = new MyHashmap<String, PeopleRecord>(100); // Assuming an initial capacity of 100
     }
 
     // Method a: loadData
@@ -149,7 +147,7 @@ public class DatabaseProcessing {
 
             // Test sort
             List<PeopleRecord> sortedRecords = dbProcessing.sort();
-//            System.out.println("Sorted Records: " + sortedRecords);
+            System.out.println("Sorted Records: " + sortedRecords);
 
             // Test getMostFrequentWords
             List<MyHashmap.MapEntry<String, Integer>> frequentWords = dbProcessing.getMostFrequentWords("resources/people.txt", 5, 3);
@@ -164,6 +162,7 @@ public class DatabaseProcessing {
 }
 
 
+@SuppressWarnings("ALL")
 class MyBST<T extends Comparable<T>> {
     Node<T> root; // Root node of the BST
 
@@ -250,7 +249,7 @@ class MyBST<T extends Comparable<T>> {
 }
 
 class MyHeap<T extends Comparable<T>> {
-    private List<T> heap;
+    private final List<T> heap;
 
     // Constructor
     public MyHeap() {
@@ -279,9 +278,9 @@ class MyHeap<T extends Comparable<T>> {
         if (heap.isEmpty()) {
             return null; // Or throw an exception
         }
-        T removedElement = heap.get(0); // The root element
-        heap.set(0, heap.get(heap.size() - 1)); // Move the last element to the root
-        heap.remove(heap.size() - 1); // Remove the last element
+        T removedElement = heap.getFirst(); // The root element
+        heap.set(0, heap.getLast()); // Move the last element to the root
+        heap.removeLast(); // Remove the last element
         heapifyDown(0); // Adjust the heap from the root downwards
         return removedElement;
     }
@@ -314,6 +313,7 @@ class MyHeap<T extends Comparable<T>> {
     }
 }
 
+@SuppressWarnings("ALL")
 class MyHashmap<K, V> {
     private static final int DEFAULT_CAPACITY = 16; // Default initial capacity
     private static final double LOAD_FACTOR_THRESHOLD = 0.75;
@@ -482,6 +482,7 @@ class MyHashmap<K, V> {
 }
 
 
+@SuppressWarnings("ALL")
 class PeopleRecord implements Comparable<PeopleRecord> {
     // Attributes
     private String givenName;
