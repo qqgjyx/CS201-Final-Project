@@ -1,29 +1,3 @@
-/*
-PeopleRecord Class: Comparable Interface
-Your PeopleRecord class has a compareTo method, but it does not implement the Comparable interface. To adhere to Java's conventions and ensure compatibility with collections that rely on comparison (like a sorted tree or heap), it's recommended to explicitly implement Comparable<PeopleRecord>.
-
-MyBST Class: Handling Duplicates
-Your current MyBST implementation does not account for the possibility of duplicate entries. Since you're comparing records by family name, consider what should happen if two records have the same family name. You might need to define a secondary comparison criterion or handle duplicates in some other manner.
-
-MyHeap Class: Comparison Logic
-Ensure that the comparison logic in your MyHeap class aligns with how you want to structure the heap (min-heap or max-heap). The current implementation seems to be for a min-heap. If a max-heap is desired, you'll need to adjust the comparison logic in heapifyUp and heapifyDown.
-Under the codes have already realized the function of smallest heap. If the largest heap is needed, you can change the "smallest" in line 289 into "largest".
-
-MyHashmap Class: Resize Logic and Deleted Entries
-Your MyHashmap does not currently handle resizing when it becomes full, nor does it have a mechanism to handle deleted entries (like using a special object to mark deleted slots). Depending on the expected use case and data size, you might want to implement these features.
-Additionally, ensure that the hash function (getHashIndex) evenly distributes entries to minimize collisions.
-
-General:
-Error Handling
-TODO:Consider adding error handling, particularly for edge cases. For example, what should happen if a null PeopleRecord is inserted into the BST or Heap? Should your Hashmap throw an exception when it's full, or should it resize?
-
-Testing and Validation
-TODO:Thoroughly test each class to ensure they behave as expected, particularly under edge cases (like inserting duplicate values into the BST or handling collisions in the Hashmap).
-
-DatabaseProcessing Class
-The DatabaseProcessing class is currently empty. This class should eventually include the logic for interacting with these data structures and implementing the required functionalities like loading data, searching, sorting, etc.
- */
-
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.util.ArrayList;
@@ -32,20 +6,36 @@ import java.util.List;
 import java.util.function.Predicate;
 import java.util.Scanner;
 
-@SuppressWarnings("ALL")
+/**
+ * The DatabaseProcessing class manages the loading, searching, sorting,
+ * and analysis of PeopleRecord data from a file. It utilizes binary search trees,
+ * heaps, and hashmaps to organize and process the data efficiently.
+ */
 public class DatabaseProcessing {
     private final MyBST<PeopleRecord> bst;
     private final MyHeap<PeopleRecord> heap;
+    private final MyHashmap<String, Integer> hashmap;
+    private String filePath; // Variable to store the file path
 
     public DatabaseProcessing() {
-        bst = new MyBST<PeopleRecord>();
-        heap = new MyHeap<PeopleRecord>();
-        MyHashmap<String, PeopleRecord> hashmap = new MyHashmap<String, PeopleRecord>(100); // Assuming an initial capacity of 100
+        bst = new MyBST<>();
+        heap = new MyHeap<>();
+        hashmap = new MyHashmap<>(100); // Assuming an initial capacity of 100
     }
 
-    // Method a: loadData
+    /**
+     * Loads data from a specified file into the binary search tree.
+     * Each line in the file is expected to represent a PeopleRecord.
+     *
+     * @param fileName The path of the file to be read.
+     * @throws FileNotFoundException if the file is not found.
+     */
     public void loadData(String fileName) throws FileNotFoundException {
-        File file = new File(fileName);
+        if (filePath == null || filePath.isEmpty()) {
+            throw new FileNotFoundException("File path is not set.");
+        }
+
+        File file = new File(filePath);
         Scanner scanner = new Scanner(file);
 
         while (scanner.hasNextLine()) {
@@ -64,13 +54,25 @@ public class DatabaseProcessing {
         scanner.close();
     }
 
-    //TODO Method b: search
+    /**
+     * Searches for PeopleRecords that match the given and family names.
+     *
+     * @param givenName The given name to match.
+     * @param familyName The family name to match.
+     * @return A list of PeopleRecords matching the given criteria.
+     */
+    @SuppressWarnings("ClassEscapesDefinedScope")
     public List<PeopleRecord> search(String givenName, String familyName) {
-        Predicate<PeopleRecord> isSmith = record -> "France".equals(record.getFamilyName());
-        return  bst.search(isSmith);
+        Predicate<PeopleRecord> matchName = record -> record.getFamilyName().equals(familyName) && record.getGivenName().equals(givenName);
+        return bst.search(matchName);
     }
 
-    // Method c: sort
+    /**
+     * Sorts the PeopleRecords based on the criteria defined in the PeopleRecord's compareTo method.
+     *
+     * @return A sorted list of PeopleRecords.
+     */
+    @SuppressWarnings("ClassEscapesDefinedScope")
     public List<PeopleRecord> sort() {
         List<PeopleRecord> sortedList = new ArrayList<>();
         transferBSTtoHeap(bst.root);
@@ -88,7 +90,17 @@ public class DatabaseProcessing {
         }
     }
 
-    // Method d: getMostFrequentWords
+    /**
+     * Analyzes the text from a file and returns the most frequent words of a given length.
+     *
+     * @param fileName The file to analyze.
+     * @param count The number of top frequent words to return.
+     * @param len The minimum length of words to consider.
+     * @return A list of the most frequent words and their counts.
+     * @throws FileNotFoundException if the file is not found.
+     * @throws ShortLengthException if the specified length is less than the minimum required.
+     */
+    @SuppressWarnings("ClassEscapesDefinedScope")
     public List<MyHashmap.MapEntry<String, Integer>> getMostFrequentWords(String fileName, int count, int len)
             throws FileNotFoundException, ShortLengthException {
         if (len < 3) {
@@ -96,7 +108,6 @@ public class DatabaseProcessing {
         }
 
         Scanner scanner = new Scanner(new File(fileName));
-        MyHashmap<String, Integer> wordFrequencyMap = new MyHashmap<>(100);
 
         while (scanner.hasNext()) {
             String line = scanner.nextLine();
@@ -108,7 +119,7 @@ public class DatabaseProcessing {
                 for (String word : words) {
                     word = word.toLowerCase(); // Consider converting to lower case to avoid case-sensitive duplicates
                     if (word.length() >= len) {
-                        wordFrequencyMap.put(word, wordFrequencyMap.getOrDefault(word, 0) + 1);
+                        hashmap.put(word, hashmap.getOrDefault(word, 0) + 1);
                     }
                 }
             }
@@ -116,7 +127,7 @@ public class DatabaseProcessing {
         scanner.close();
 
         // Create a list from elements of the hashmap
-        List<MyHashmap.MapEntry<String, Integer>> list = new ArrayList<>(wordFrequencyMap.entrySet());
+        List<MyHashmap.MapEntry<String, Integer>> list = new ArrayList<>(hashmap.entrySet());
 
         // Sort the list using lambda expression
         list.sort((o1, o2) -> o2.getValue().compareTo(o1.getValue()));
@@ -125,7 +136,18 @@ public class DatabaseProcessing {
         return list.subList(0, Math.min(count, list.size()));
     }
 
-    // Custom exception class
+    /**
+     * Sets the file path for loading data.
+     *
+     * @param filePath The path of the file to be read.
+     */
+    public void setFilePath(String filePath) {
+        this.filePath = filePath;
+    }
+
+    /**
+     * Custom exception class to handle cases where the provided length is shorter than expected.
+     */
     static class ShortLengthException extends Exception {
         public ShortLengthException(String message) {
             super(message);
@@ -135,8 +157,11 @@ public class DatabaseProcessing {
     // Main method for testing
     public static void main(String[] args) {
         DatabaseProcessing dbProcessing = new DatabaseProcessing();
+        dbProcessing.setFilePath("resources/people.txt"); // TODO: Set the file path here
+
         try {
-            dbProcessing.loadData("resources/people.txt");
+            // Test loadData
+            dbProcessing.loadData(dbProcessing.filePath);
 
             // Test search
             List<PeopleRecord> searchResults = dbProcessing.search("Marcia", "France");
@@ -144,14 +169,29 @@ public class DatabaseProcessing {
             for (PeopleRecord pr : searchResults) {
                 System.out.println(pr);
             }
+            System.out.print("\n");
 
             // Test sort
             List<PeopleRecord> sortedRecords = dbProcessing.sort();
-            System.out.println("Sorted Records: " + sortedRecords);
+            for (PeopleRecord pr : sortedRecords)
+                dbProcessing.heap.insert(pr);
+            System.out.println("Sorted Records (Display the first 5 entries, change if necessary): " );
+            for (int i = 0; i < 5; i++)
+                System.out.println(dbProcessing.heap.remove());
+            System.out.print("\n");
 
             // Test getMostFrequentWords
-            List<MyHashmap.MapEntry<String, Integer>> frequentWords = dbProcessing.getMostFrequentWords("resources/people.txt", 5, 3);
+            List<MyHashmap.MapEntry<String, Integer>> frequentWords = dbProcessing.getMostFrequentWords(dbProcessing.filePath, 5, 3);
             System.out.println("Frequent Words: " + frequentWords);
+            System.out.print("\n");
+
+            // Display BST Structure
+            System.out.println("BST Structure:");
+            dbProcessing.bst.printTree(3);
+
+            // Display HEAP Structure (5 entries removed above, add back if necessary)
+            System.out.println("\nHeap Structure:");
+            dbProcessing.heap.printHeap(3);
 
         } catch (FileNotFoundException e) {
             System.err.println("File not found: " + e.getMessage());
@@ -161,7 +201,11 @@ public class DatabaseProcessing {
     }
 }
 
-
+/**
+ * MyBST (My Binary Search Tree) is a generic class that implements a binary search tree.
+ * It is designed to store data in a sorted manner and provides methods for insertion,
+ * searching, and retrieving tree information.
+ */
 @SuppressWarnings("ALL")
 class MyBST<T extends Comparable<T>> {
     Node<T> root; // Root node of the BST
@@ -208,7 +252,7 @@ class MyBST<T extends Comparable<T>> {
     }
 
     // Method to insert a new PeopleRecord into the tree
-    public void insert(T newData) throws NullPointerException {
+    public void insert(T newData) {
         if (newData == null) {
             throw new NullPointerException("Cannot insert null data.");
         }
@@ -246,8 +290,28 @@ class MyBST<T extends Comparable<T>> {
             searchRecords(node.right, condition, matchingRecords);
         }
     }
+
+    // Method to print the first few levels of the tree
+    public void printTree(int maxDepth) {
+        printTree(root, 0, maxDepth);
+    }
+
+    private void printTree(Node<T> node, int level, int maxDepth) {
+        if (node == null || level > maxDepth) {
+            return;
+        }
+        printTree(node.right, level + 1, maxDepth);
+        System.out.println(" ".repeat(level * 4) + "-> " + node.data);
+        printTree(node.left, level + 1, maxDepth);
+    }
 }
 
+
+/**
+ * MyHeap is a generic min-heap implementation. It organizes elements in a way that
+ * the smallest element is always at the root. It provides methods for element insertion,
+ * removal, and size retrieval.
+ */
 class MyHeap<T extends Comparable<T>> {
     private final List<T> heap;
 
@@ -311,8 +375,31 @@ class MyHeap<T extends Comparable<T>> {
             heapifyDown(smallest);
         }
     }
+
+
+    // Method to print the first few levels of the heap
+    public void printHeap(int maxDepth) {
+        int levelSize = 1;
+        int currentIndex = 0;
+        int currentDepth = 0;
+
+        while (currentIndex < heap.size() && currentDepth <= maxDepth) {
+            for (int i = 0; i < levelSize && currentIndex + i < heap.size(); i++) {
+                System.out.print(heap.get(currentIndex + i) + " ");
+            }
+            System.out.println();
+            currentIndex += levelSize;
+            levelSize *= 2;
+            currentDepth++;
+        }
+    }
 }
 
+/**
+ * MyHashmap is a generic hashmap implementation. It maps keys to values and
+ * provides efficient data retrieval. This class handles collisions using quadratic probing
+ * and supports resizing when the load factor threshold is exceeded.
+ */
 @SuppressWarnings("ALL")
 class MyHashmap<K, V> {
     private static final int DEFAULT_CAPACITY = 16; // Default initial capacity
@@ -438,8 +525,6 @@ class MyHashmap<K, V> {
         return size;
     }
 
-    //TODO Additional methods as required...
-
     // Method to get entry set
     public List<MapEntry<K, V>> entrySet() {
         List<MapEntry<K, V>> entryList = new ArrayList<>();
@@ -481,7 +566,11 @@ class MyHashmap<K, V> {
     }
 }
 
-
+/**
+ * PeopleRecord represents a record of an individual's personal and contact information.
+ * It includes details like name, address, phone numbers, and email. This class
+ * implements Comparable to allow sorting based on specified criteria.
+ */
 @SuppressWarnings("ALL")
 class PeopleRecord implements Comparable<PeopleRecord> {
     // Attributes
@@ -585,13 +674,29 @@ class PeopleRecord implements Comparable<PeopleRecord> {
                 '}';
     }
 
-    // compareTo Method
+    /**
+     * Compares this PeopleRecord with another PeopleRecord for order.
+     * Ordering is primarily based on the family name, then given name, and finally birthday.
+     *
+     * @param other The PeopleRecord to be compared.
+     * @return A negative integer, zero, or a positive integer as this object
+     *         is less than, equal to, or greater than the specified object.
+     */
+    @Override
     public int compareTo(PeopleRecord other) {
         int lastNameComparison = this.familyName.compareTo(other.familyName);
         if (lastNameComparison == 0) {
-            return this.givenName.compareTo(other.givenName);
+            // Use another field for secondary comparison if family names are the same
+            int givenNameComparison = this.givenName.compareTo(other.givenName);
+            if (givenNameComparison == 0) {
+                return this.birthday.compareTo(other.birthday);
+            }
+            return givenNameComparison;
         }
         return lastNameComparison;
+
+        // TODO: Compare by birthday
+        // return this.birthday.compareTo(other.birthday);
     }
 }
 

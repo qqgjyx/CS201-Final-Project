@@ -4,7 +4,7 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="be025498-9dd4-47fa-9e32-ac2e4e208a37" name="Changes" comment="v0.9.4 workable-not tested">
+    <list default="true" id="be025498-9dd4-47fa-9e32-ac2e4e208a37" name="Changes" comment="v0.9.5 workable-not tested">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/DatabaseProcessing.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/DatabaseProcessing.java" afterDir="false" />
     </list>
@@ -87,6 +87,7 @@
     "project.structure.last.edited": "Modules",
     "project.structure.proportion": "0.0",
     "project.structure.side.proportion": "0.0",
+    "run.code.analysis.last.selected.profile": "pProject Default",
     "settings.editor.selected.configurable": "vcs.Git",
     "vue.rearranger.settings.migration": "true"
   }
@@ -118,7 +119,7 @@
       <workItem from="1702045819817" duration="1405000" />
       <workItem from="1702100417241" duration="2897000" />
       <workItem from="1702103548755" duration="8000" />
-      <workItem from="1702115672134" duration="10544000" />
+      <workItem from="1702115672134" duration="14542000" />
     </task>
     <task id="LOCAL-00001" summary="Created roots files">
       <option name="closed" value="true" />
@@ -176,7 +177,15 @@
       <option name="project" value="LOCAL" />
       <updated>1702125775065</updated>
     </task>
-    <option name="localTasksCounter" value="8" />
+    <task id="LOCAL-00008" summary="v0.9.5 workable-not tested">
+      <option name="closed" value="true" />
+      <created>1702126290800</created>
+      <option name="number" value="00008" />
+      <option name="presentableId" value="LOCAL-00008" />
+      <option name="project" value="LOCAL" />
+      <updated>1702126290800</updated>
+    </task>
+    <option name="localTasksCounter" value="9" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -211,7 +220,8 @@
     <MESSAGE value="v0.9.1 workable-not tested" />
     <MESSAGE value="v0.9.3 workable-not tested" />
     <MESSAGE value="v0.9.4 workable-not tested" />
-    <option name="LAST_COMMIT_MESSAGE" value="v0.9.4 workable-not tested" />
+    <MESSAGE value="v0.9.5 workable-not tested" />
+    <option name="LAST_COMMIT_MESSAGE" value="v0.9.5 workable-not tested" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
@@ -220,11 +230,6 @@
           <url>file://$PROJECT_DIR$/src/TestOnly.java</url>
           <line>8</line>
           <option name="timeStamp" value="2" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" type="java-line">
-          <url>file://$PROJECT_DIR$/src/DatabaseProcessing.java</url>
-          <line>142</line>
-          <option name="timeStamp" value="9" />
         </line-breakpoint>
       </breakpoints>
     </breakpoint-manager>
